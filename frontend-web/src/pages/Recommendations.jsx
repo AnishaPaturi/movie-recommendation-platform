@@ -44,6 +44,25 @@ const Recommendations = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const saveToLocalHistory = (queryTitle, recommendedMovies) => {
+    try {
+      const localData = localStorage.getItem("recommendationHistory");
+      const parsedData = localData ? JSON.parse(localData) : [];
+      
+      const newHistoryItem = {
+        _id: Date.now().toString(),
+        queryTitle,
+        recommendedMovies: recommendedMovies.map(m => m.title || m),
+        timestamp: new Date().toISOString()
+      };
+      
+      const updatedHistory = [...parsedData, newHistoryItem].slice(-20);
+      localStorage.setItem("recommendationHistory", JSON.stringify(updatedHistory));
+    } catch (err) {
+      console.warn("Failed to save recommendation history to localStorage:", err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!query.trim()) return;
@@ -54,7 +73,9 @@ const Recommendations = () => {
     setShowSuggestions(false);
     try {
       const data = await recommendationService.getRecommendations(query.trim(), 6);
-      setRecommendations(data.recommendations || []);
+      const recs = data.recommendations || [];
+      setRecommendations(recs);
+      saveToLocalHistory(query.trim(), recs);
     } catch (err) {
       console.error(err);
       setError("We couldn't find recommendations for that movie. Please try another title (e.g., 'Toy Story', 'Inception', 'Star Wars').");
@@ -74,7 +95,9 @@ const Recommendations = () => {
     setSearched(true);
     recommendationService.getRecommendations(movie.title, 6)
       .then((data) => {
-        setRecommendations(data.recommendations || []);
+        const recs = data.recommendations || [];
+        setRecommendations(recs);
+        saveToLocalHistory(movie.title, recs);
       })
       .catch((err) => {
         console.error(err);
@@ -95,7 +118,9 @@ const Recommendations = () => {
       if (randomMovie && randomMovie.title) {
         setQuery(randomMovie.title);
         const data = await recommendationService.getRecommendations(randomMovie.title, 6);
-        setRecommendations(data.recommendations || []);
+        const recs = data.recommendations || [];
+        setRecommendations(recs);
+        saveToLocalHistory(randomMovie.title, recs);
       } else {
         setError("Failed to fetch a random movie. Please try again.");
       }

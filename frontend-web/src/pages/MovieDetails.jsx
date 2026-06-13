@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { movieService } from "../services/api";
-import { AuthContext } from "../context/AuthContext";
 
 const MovieDetails = () => {
   const { id } = useParams();
-  const { user } = useContext(AuthContext);
   
   const [movie, setMovie] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -15,6 +13,7 @@ const MovieDetails = () => {
   // Review submission state
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [reviewerName, setReviewerName] = useState("");
   const [reviewError, setReviewError] = useState(null);
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
@@ -48,8 +47,9 @@ const MovieDetails = () => {
     }
 
     try {
-      await movieService.createReview(id, rating, comment);
+      await movieService.createReview(id, rating, comment, reviewerName);
       setComment("");
+      setReviewerName("");
       setRating(5);
       setReviewSuccess(true);
       // Reload details to update average rating and list
@@ -141,16 +141,26 @@ const MovieDetails = () => {
               </div>
 
               {/* Add Review Form */}
-              {user ? (
-                <div className="glass-panel review-form">
-                  <h4>Write a Review</h4>
-                  {reviewError && <div className="alert-error">{reviewError}</div>}
-                  {reviewSuccess && <div style={{ color: "#00ff88", marginBottom: "15px", fontSize: "14px" }}>Review added successfully!</div>}
-                  
-                  <form onSubmit={handleReviewSubmit}>
-                    <div className="form-group">
+              <div className="glass-panel review-form">
+                <h4>Write a Review</h4>
+                {reviewError && <div className="alert-error">{reviewError}</div>}
+                {reviewSuccess && <div style={{ color: "#00ff88", marginBottom: "15px", fontSize: "14px" }}>Review added successfully!</div>}
+                
+                <form onSubmit={handleReviewSubmit}>
+                  <div className="form-group" style={{ display: "flex", gap: "24px", flexWrap: "wrap", marginBottom: "16px" }}>
+                    <div style={{ flex: "1", minWidth: "200px" }}>
+                      <label>Your Name (Optional)</label>
+                      <input
+                        type="text"
+                        value={reviewerName}
+                        onChange={(e) => setReviewerName(e.target.value)}
+                        placeholder="Anonymous Guest"
+                        className="form-input"
+                      />
+                    </div>
+                    <div>
                       <label>Rating</label>
-                      <div className="rating-select">
+                      <div className="rating-select" style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
                             type="button"
@@ -163,28 +173,24 @@ const MovieDetails = () => {
                         ))}
                       </div>
                     </div>
+                  </div>
 
-                    <div className="form-group">
-                      <label>Comment</label>
-                      <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Write your review here..."
-                        className="review-textarea"
-                        required
-                      />
-                    </div>
+                  <div className="form-group">
+                    <label>Comment</label>
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Write your review here..."
+                      className="review-textarea"
+                      required
+                    />
+                  </div>
 
-                    <button type="submit" className="gradient-btn" style={{ padding: "10px 24px", borderRadius: "10px", fontSize: "14px", cursor: "pointer" }}>
-                      Submit Review
-                    </button>
-                  </form>
-                </div>
-              ) : (
-                <div className="glass-panel" style={{ padding: "24px", marginBottom: "30px", color: "var(--text-muted)", fontSize: "15px" }}>
-                  Please <Link to="/login" style={{ color: "var(--color-primary)", fontWeight: "600" }}>login</Link> to leave a rating and review.
-                </div>
-              )}
+                  <button type="submit" className="gradient-btn" style={{ padding: "10px 24px", borderRadius: "10px", fontSize: "14px", cursor: "pointer" }}>
+                    Submit Review
+                  </button>
+                </form>
+              </div>
 
               {/* Reviews List */}
               {reviews.length === 0 ? (

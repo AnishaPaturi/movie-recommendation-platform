@@ -1,30 +1,19 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { authService } from "../services/api";
-import { AuthContext } from "../context/AuthContext";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const History = () => {
-  const { user, loading: authLoading } = useContext(AuthContext);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if not logged in and not loading auth
-    if (!authLoading && !user) {
-      navigate("/login");
-    }
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    const fetchHistory = async () => {
-      if (!user) return;
+    const fetchHistory = () => {
       setLoading(true);
       try {
-        const data = await authService.getHistory();
-        // Sort history by date descending
-        const sortedData = data ? [...data].reverse() : [];
+        const localData = localStorage.getItem("recommendationHistory");
+        const parsedData = localData ? JSON.parse(localData) : [];
+        // Sort history by date descending (latest first)
+        const sortedData = [...parsedData].reverse();
         setHistory(sortedData);
       } catch (err) {
         console.error(err);
@@ -34,9 +23,9 @@ const History = () => {
       }
     };
     fetchHistory();
-  }, [user]);
+  }, []);
 
-  if (authLoading || loading) {
+  if (loading) {
     return <div className="spinner" style={{ marginTop: "100px" }}></div>;
   }
 
