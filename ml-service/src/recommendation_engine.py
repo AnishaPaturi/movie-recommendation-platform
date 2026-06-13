@@ -1,5 +1,6 @@
 import joblib
 import numpy as np
+import difflib
 
 movies = joblib.load("models/movies.pkl")
 tfidf_matrix = joblib.load("models/tfidf_matrix.pkl")
@@ -26,6 +27,19 @@ def find_movie_index(title, movies_df):
     matches = movies_df[movies_df["clean_title"].str.lower().str.contains(title_clean, regex=False)]
     if not matches.empty:
         return matches.index[0]
+        
+    # 5. Fuzzy match on title or clean_title using difflib
+    all_titles = movies_df["title"].str.lower().tolist()
+    close_matches = difflib.get_close_matches(title_clean, all_titles, n=1, cutoff=0.5)
+    if close_matches:
+        matched_title = close_matches[0]
+        return movies_df[movies_df["title"].str.lower() == matched_title].index[0]
+        
+    all_clean_titles = movies_df["clean_title"].str.lower().tolist()
+    close_clean_matches = difflib.get_close_matches(title_clean, all_clean_titles, n=1, cutoff=0.5)
+    if close_clean_matches:
+        matched_clean_title = close_clean_matches[0]
+        return movies_df[movies_df["clean_title"].str.lower() == matched_clean_title].index[0]
         
     return None
 

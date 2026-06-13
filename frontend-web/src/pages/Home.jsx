@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { movieService } from "../services/api";
 import MovieCard from "../components/MovieCard";
 
@@ -10,18 +10,38 @@ const Home = () => {
   const [keyword, setKeyword] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [featuredMovies, setFeaturedMovies] = useState([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+  const carouselRef = useRef(null);
 
   const genresList = [
     "Action", "Adventure", "Animation", "Children", "Comedy", 
     "Crime", "Drama", "Fantasy", "Mystery", "Romance", "Sci-Fi", "Thriller"
   ];
 
-  // Fetch movies on page, searchQuery, or selectedGenre changes
+  // Fetch featured movies on mount (top 10 highest-rated)
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      setFeaturedLoading(true);
+      try {
+        const data = await movieService.getMovies(1, "", "", "rating", 10);
+        setFeaturedMovies(data.movies || []);
+      } catch (error) {
+        console.error("Error fetching featured movies:", error.message);
+      } finally {
+        setFeaturedLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  // Fetch movies on page, searchQuery, selectedGenre, or sortBy changes
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
       try {
-        const data = await movieService.getMovies(page, searchQuery, selectedGenre);
+        const data = await movieService.getMovies(page, searchQuery, selectedGenre, sortBy);
         setMovies(data.movies || []);
         setPages(data.pages || 1);
       } catch (error) {
@@ -31,7 +51,7 @@ const Home = () => {
       }
     };
     fetchMovies();
-  }, [page, searchQuery, selectedGenre]);
+  }, [page, searchQuery, selectedGenre, sortBy]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -46,6 +66,16 @@ const Home = () => {
       setSelectedGenre(genre);
     }
     setPage(1); // Reset to first page
+  };
+
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 320;
+      carouselRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth"
+      });
+    }
   };
 
   return (
@@ -78,12 +108,53 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Featured / Top Rated Carousel Section */}
+      {!featuredLoading && featuredMovies.length > 0 && (
+        <section className="featured-section section-padding fade-in-up delay-1">
+          <div className="container">
+            <h2 className="section-title" style={{ fontSize: "28px", textAlign: "left", marginBottom: "8px" }}>
+              Trending & <span className="gradient-text">Top Rated</span>
+            </h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "14px", textAlign: "left", marginBottom: "20px" }}>
+              Explore the most highly acclaimed movies selected by CineMatch users.
+            </p>
+            <div className="carousel-container">
+              <button className="carousel-btn carousel-btn-prev" onClick={() => scrollCarousel("left")}>◀</button>
+              <div className="carousel-track" ref={carouselRef}>
+                {featuredMovies.map((movie) => (
+                  <div key={movie._id} className="carousel-item">
+                    <MovieCard movie={movie} />
+                  </div>
+                ))}
+              </div>
+              <button className="carousel-btn carousel-btn-next" onClick={() => scrollCarousel("right")}>▶</button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Movie Directory Section */}
       <section className="section-padding" style={{ background: "rgba(255, 255, 255, 0.01)" }}>
         <div className="container">
           <div className="filter-bar">
-            <h2>Explore Collection</h2>
-            <div className="genre-filters">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", flexWrap: "wrap", gap: "16px" }}>
+              <h2 style={{ fontSize: "28px" }}>Explore Collection</h2>
+              <div className="sort-select-wrapper">
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setPage(1); // Reset page on sort change
+                  }}
+                  className="sort-select"
+                >
+                  <option value="">Sort: A to Z</option>
+                  <option value="rating">Sort: Top Rated</option>
+                  <option value="popular">Sort: Most Popular</option>
+                </select>
+              </div>
+            </div>
+            <div className="genre-filters" style={{ width: "100%", marginTop: "16px" }}>
               {genresList.map((genre) => (
                 <button
                   key={genre}

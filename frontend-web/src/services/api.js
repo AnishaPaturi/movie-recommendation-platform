@@ -45,16 +45,20 @@ export const authService = {
 };
 
 export const movieService = {
-  getMovies: async (pageNumber = 1, keyword = "", genre = "") => {
-    const response = await api.get(`/movies?pageNumber=${pageNumber}&keyword=${keyword}&genre=${genre}`);
+  getMovies: async (pageNumber = 1, keyword = "", genre = "", sortBy = "", limit = 12) => {
+    const response = await api.get(`/movies?pageNumber=${pageNumber}&keyword=${keyword}&genre=${genre}&sortBy=${sortBy}&limit=${limit}`);
     return response.data;
   },
   getMovieDetails: async (id) => {
     const response = await api.get(`/movies/${id}`);
     return response.data;
   },
-  createReview: async (id, rating, comment) => {
-    const response = await api.post(`/movies/${id}/reviews`, { rating, comment });
+  getRandomMovie: async () => {
+    const response = await api.get("/movies/random");
+    return response.data;
+  },
+  createReview: async (id, rating, comment, username) => {
+    const response = await api.post(`/movies/${id}/reviews`, { rating, comment, username });
     return response.data;
   },
 };
