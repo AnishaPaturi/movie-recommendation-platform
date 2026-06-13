@@ -28,7 +28,7 @@ services:
       - JWT_SECRET=supersecretkey123
     depends_on:
       - ml-service
-      - mongodb-v
+      - mongodb
 
 volumes:
   mongo-data:

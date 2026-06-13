@@ -2,6 +2,14 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import Movie from "../models/Movie.js";
 import User from "../models/User.js";
+import https from "https";
+import crypto from "crypto";
+
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+  minVersion: "TLSv1",
+  secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
+});
 
 // @desc    Get recommendations for a movie title
 // @route   POST /api/recommend
@@ -22,30 +30,44 @@ const getRecommendations = async (req, res) => {
 
     const recommendedTitles = mlResponse.data.recommendations || [];
 
-    // Retrieve rich movie objects from our local MongoDB database
-    const richRecommendations = [];
-    for (const recTitle of recommendedTitles) {
-      // Direct title match
-      let dbMovie = await Movie.findOne({ title: recTitle });
-      
-      // If direct match fails, try match without release year
-      if (!dbMovie) {
-        const cleanTitle = recTitle.replace(/\s*\(\d{4}\)\s*$/, "");
-        dbMovie = await Movie.findOne({ title: { $regex: `^${cleanTitle}`, $options: "i" } });
-      }
+    // Retrieve rich movie objects from our local MongoDB database in parallel
+    const richRecommendations = await Promise.all(
+      recommendedTitles.map(async (recTitle) => {
+        let dbMovie = await Movie.findOne({ title: recTitle });
+        
+        if (!dbMovie) {
+          const cleanTitle = recTitle.replace(/\s*\(\d{4}\)\s*$/, "");
+          dbMovie = await Movie.findOne({ title: { $regex: `^${cleanTitle}`, $options: "i" } });
+        }
 
-      if (dbMovie) {
-        richRecommendations.push(dbMovie);
-      } else {
-        // Fallback object if the movie isn't in MongoDB yet
-        richRecommendations.push({
-          title: recTitle,
-          genres: [],
-          posterUrl: "",
-          overview: "No description available.",
-        });
-      }
-    }
+        if (dbMovie) {
+          // Lazy load poster from FM-DB API if not set
+          if (!dbMovie.posterUrl || dbMovie.posterUrl === "") {
+            try {
+              const cleanTitle = dbMovie.title.replace(/\s*\(\d{4}\)\s*$/, "");
+              const searchUrl = `https://imdb.iamidiotareyoutoo.com/search?q=${encodeURIComponent(cleanTitle)}`;
+              const fmRes = await axios.get(searchUrl);
+              
+              if (fmRes.data && fmRes.data.ok && fmRes.data.description && fmRes.data.description.length > 0) {
+                const firstMatch = fmRes.data.description[0];
+                dbMovie.posterUrl = firstMatch["#IMG_POSTER"] || "";
+                await dbMovie.save();
+              }
+            } catch (err) {
+              console.warn("FM-DB fetch failed for recommendation:", dbMovie.title, err.message);
+            }
+          }
+          return dbMovie;
+        } else {
+          return {
+            title: recTitle,
+            genres: [],
+            posterUrl: "",
+            overview: "No description available.",
+          };
+        }
+      })
+    );
 
     // Optional authentication check: if header is provided, decode and save to User history
     if (

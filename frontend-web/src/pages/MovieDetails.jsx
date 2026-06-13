@@ -81,9 +81,23 @@ const MovieDetails = () => {
         <div className="movie-details-layout">
           {/* Left Column: Poster & Info */}
           <div>
-            <div className="movie-poster-large">
-              {/* Large Poster Placeholder */}
-            </div>
+            {movie.posterUrl ? (
+              <img
+                src={movie.posterUrl}
+                alt={movie.title}
+                className="movie-poster-large"
+                style={{
+                  width: "100%",
+                  height: "480px",
+                  borderRadius: "20px",
+                  objectFit: "cover",
+                  boxShadow: "var(--shadow-card)",
+                  border: "1px solid var(--border-glass)"
+                }}
+              />
+            ) : (
+              <div className="movie-poster-large"></div>
+            )}
             
             <div className="movie-meta-info">
               <div className="meta-row">

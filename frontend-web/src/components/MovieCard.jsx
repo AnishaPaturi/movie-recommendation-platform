@@ -13,9 +13,22 @@ const MovieCard = ({ movie }) => {
 
   return (
     <div className="glass-panel movie-card" onClick={handleClick}>
-      <div className="movie-poster-placeholder">
-        {/* Placeholder image logic, could support actual posterUrl later */}
-      </div>
+      {movie.posterUrl ? (
+        <img
+          src={movie.posterUrl}
+          alt={movie.title}
+          style={{
+            width: "100%",
+            height: "280px",
+            borderRadius: "12px",
+            objectFit: "cover",
+            marginBottom: "16px",
+            border: "1px solid rgba(255, 255, 255, 0.05)"
+          }}
+        />
+      ) : (
+        <div className="movie-poster-placeholder"></div>
+      )}
       
       <div className="movie-card-genres">
         {movie.genres && movie.genres.slice(0, 3).map((genre, index) => (

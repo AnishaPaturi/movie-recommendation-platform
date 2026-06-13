@@ -1,5 +1,14 @@
 import Movie from "../models/Movie.js";
 import Review from "../models/Review.js";
+import axios from "axios";
+import https from "https";
+import crypto from "crypto";
+
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+  minVersion: "TLSv1",
+  secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
+});
 
 // @desc    Get all movies (paginated, with search and genre filters)
 // @route   GET /api/movies
@@ -37,8 +46,30 @@ const getMovies = async (req, res) => {
       .skip(pageSize * (page - 1))
       .sort({ title: 1 }); // Sort alphabetically
 
+    // Lazy load poster URLs for the current page in parallel
+    const richMovies = await Promise.all(
+      movies.map(async (movie) => {
+        if (!movie.posterUrl || movie.posterUrl === "") {
+          try {
+            const cleanTitle = movie.title.replace(/\s*\(\d{4}\)\s*$/, "");
+            const searchUrl = `https://imdb.iamidiotareyoutoo.com/search?q=${encodeURIComponent(cleanTitle)}`;
+            const fmRes = await axios.get(searchUrl);
+            
+            if (fmRes.data && fmRes.data.ok && fmRes.data.description && fmRes.data.description.length > 0) {
+              const firstMatch = fmRes.data.description[0];
+              movie.posterUrl = firstMatch["#IMG_POSTER"] || "";
+              await movie.save();
+            }
+          } catch (fmErr) {
+            console.warn("Failed to fetch poster from FM-DB API for list:", movie.title, fmErr.message);
+          }
+        }
+        return movie;
+      })
+    );
+
     res.json({
-      movies,
+      movies: richMovies,
       page,
       pages: Math.ceil(count / pageSize),
       total: count,
@@ -57,6 +88,23 @@ const getMovieById = async (req, res) => {
     const movie = await Movie.findById(req.params.id);
 
     if (movie) {
+      // Lazy load poster from FM-DB API if not set
+      if (!movie.posterUrl || movie.posterUrl === "") {
+        try {
+          const cleanTitle = movie.title.replace(/\s*\(\d{4}\)\s*$/, "");
+          const searchUrl = `https://imdb.iamidiotareyoutoo.com/search?q=${encodeURIComponent(cleanTitle)}`;
+          const fmRes = await axios.get(searchUrl);
+          
+          if (fmRes.data && fmRes.data.ok && fmRes.data.description && fmRes.data.description.length > 0) {
+            const firstMatch = fmRes.data.description[0];
+            movie.posterUrl = firstMatch["#IMG_POSTER"] || "";
+            await movie.save();
+          }
+        } catch (fmErr) {
+          console.warn("Failed to fetch poster from FM-DB API:", fmErr.message);
+        }
+      }
+
       const reviews = await Review.find({ movie: movie._id }).sort({ createdAt: -1 });
       res.json({ movie, reviews });
     } else {
