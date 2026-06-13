@@ -1,51 +1,46 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Recommendations from "./pages/Recommendations";
+import MovieDetails from "./pages/MovieDetails";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import History from "./pages/History";
+import "./App.css";
 
 function App() {
-  const [title, setTitle] = useState("");
-  const [recommendations, setRecommendations] = useState([]);
-
-  const getRecommendations = async () => {
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/recommend",
-        {
-          title: title,
-          top_n: 5,
-        }
-      );
-
-      setRecommendations(response.data.recommendations);
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
-    }
-  };
-
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-      <h1>🎬 Movie Recommendation System</h1>
+    <AuthProvider>
+      <Router>
+        <div className="App" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          <Navbar />
+          
+          <main style={{ flex: "1" }}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/recommend" element={<Recommendations />} />
+              <Route path="/movies/:id" element={<MovieDetails />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/history" element={<History />} />
+            </Routes>
+          </main>
 
-      <input
-        type="text"
-        placeholder="Enter movie title..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        style={{ padding: "10px", width: "300px" }}
-      />
-
-      <button
-        onClick={getRecommendations}
-        style={{ marginLeft: "10px", padding: "10px" }}
-      >
-        Get Recommendations
-      </button>
-
-      <ul>
-        {recommendations.map((movie, index) => (
-          <li key={index}>{movie}</li>
-        ))}
-      </ul>
-    </div>
+          <footer style={{
+            textAlign: "center",
+            padding: "24px 0",
+            borderTop: "1px solid var(--border-glass)",
+            color: "var(--text-disabled)",
+            fontSize: "14px",
+            background: "var(--bg-dark-void)"
+          }}>
+            <p>&copy; {new Date().getFullYear()} CineMatch AI. All rights reserved.</p>
+          </footer>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

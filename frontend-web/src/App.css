@@ -1,38 +1,643 @@
-.App {
+/* Navbar Layout */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 70px;
+  background: rgba(9, 10, 15, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-glass);
+  transition: var(--transition-smooth);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  color: var(--color-primary);
+  font-size: 28px;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-link {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+  padding: 8px 0;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--text-main);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  border-radius: 2px;
+}
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-login {
+  color: var(--text-main);
+  background: transparent;
+  border: 1px solid var(--border-glass);
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-login:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--text-muted);
+}
+
+.username-tag {
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 14px;
+  border-radius: 15px;
+  border: 1px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-logout {
+  color: var(--color-accent);
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  padding: 6px 10px;
+}
+
+.btn-logout:hover {
+  opacity: 0.8;
+}
+
+/* Home / Hero Banner Section */
+.hero {
+  position: relative;
   text-align: center;
+  padding: 80px 0 50px 0;
+  background-image: radial-gradient(circle at 50% 0%, rgba(0, 210, 255, 0.06) 0%, transparent 60%);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.hero-title {
+  font-size: 52px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  line-height: 1.1;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 40px auto;
+  line-height: 1.5;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Search Bar styles */
+.search-wrapper {
+  max-width: 650px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  gap: 12px;
+}
+
+.search-input-container {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  height: 52px;
+  background: var(--bg-dark-input);
+  border: 1px solid var(--border-glass);
+  border-radius: 26px;
+  padding: 0 24px 0 48px;
+  font-size: 16px;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.search-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.btn-search {
+  height: 52px;
+  padding: 0 32px;
+  border-radius: 26px;
+  font-size: 16px;
+}
+
+/* Movie Card Grids */
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 28px;
+  margin-top: 30px;
+}
+
+/* Movie Card */
+.movie-card {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+}
+
+.movie-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--border-glow);
+  box-shadow: 0 12px 30px rgba(0, 210, 255, 0.1), var(--shadow-card);
+}
+
+.movie-poster-placeholder {
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1b1c2b 0%, #0c0d16 100%);
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative;
+  overflow: hidden;
 }
 
-.App-link {
-  color: #61dafb;
+.movie-poster-placeholder::before {
+  content: '🎬';
+  font-size: 40px;
+  margin-bottom: 8px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.movie-card-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.genre-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.movie-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 12px;
+  flex: 1;
+}
+
+.movie-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  border-top: 1px solid var(--border-glass);
+  padding-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffc107;
+  font-weight: 600;
+}
+
+/* Filters & Category Bar */
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.genre-filters {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.genre-filter-btn {
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-glass);
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.genre-filter-btn:hover, .genre-filter-btn.active {
+  background: var(--color-primary-glow);
+  border-color: var(--color-primary);
+  color: var(--text-main);
+}
+
+/* Auth Cards & Forms */
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 150px);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-header h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.auth-header p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  background: var(--bg-dark-input);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 15px;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+}
+
+.btn-auth-submit {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.auth-footer a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.alert-error {
+  background: rgba(255, 90, 95, 0.15);
+  border: 1px solid var(--color-accent);
+  color: #ff7679;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Movie Details Page */
+.movie-details-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 50px;
+  text-align: left;
+}
+
+.movie-poster-large {
+  width: 100%;
+  height: 480px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1b1c2b 0%, #0c0d16 100%);
+  border: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-card);
+}
+
+.movie-poster-large::before {
+  content: '🎬';
+  font-size: 80px;
+  margin-bottom: 16px;
+}
+
+.movie-meta-info {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 12px;
+}
+
+.meta-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.movie-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.movie-title-header h1 {
+  font-size: 40px;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.movie-title-header .genres {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.movie-title-header .rating {
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.overview-box p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* Reviews styles */
+.reviews-section {
+  border-top: 1px solid var(--border-glass);
+  padding-top: 40px;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.review-form {
+  margin-bottom: 40px;
+  padding: 24px;
+}
+
+.review-form h4 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.rating-select {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rating-star-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: var(--text-disabled);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.rating-star-btn.selected, .rating-star-btn:hover {
+  color: #ffc107;
+}
+
+.review-textarea {
+  width: 100%;
+  height: 100px;
+  background: var(--bg-dark-input);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  outline: none;
+  resize: none;
+  margin-bottom: 16px;
+  transition: var(--transition-smooth);
+}
+
+.review-textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.review-item {
+  padding: 20px;
+  text-align: left;
+}
+
+.review-item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.review-user-info {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-date {
+  color: var(--text-muted);
+}
+
+/* History Page List */
+.history-item {
+  padding: 24px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.history-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.history-query {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.history-date {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.history-recs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.history-rec-tag {
+  background: rgba(0, 210, 255, 0.05);
+  border: 1px solid rgba(0, 210, 255, 0.15);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.page-btn {
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-glass);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.page-btn:hover:not(:disabled), .page-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
