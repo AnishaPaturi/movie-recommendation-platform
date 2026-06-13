@@ -1,18 +1,18 @@
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from data_preprocessing import load_data
 
 def train_model():
-    movies = load_data("data/raw/movies.csv")
+    # Load data from raw directory
+    movies = load_data("data/raw")
     
+    # Initialize TF-IDF Vectorizer
     tfidf = TfidfVectorizer(stop_words="english")
     tfidf_matrix = tfidf.fit_transform(movies["combined_features"])
     
-    cosine_sim = cosine_similarity(tfidf_matrix)
-    
+    # Save movies DataFrame, sparse TF-IDF matrix, and vectorizer
     joblib.dump(movies, "models/movies.pkl")
-    joblib.dump(cosine_sim, "models/cosine_sim.pkl")
+    joblib.dump(tfidf_matrix, "models/tfidf_matrix.pkl")
     joblib.dump(tfidf, "models/vectorizer.pkl")
 
 if __name__ == "__main__":
